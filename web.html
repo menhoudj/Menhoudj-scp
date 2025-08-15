@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>menhoudj — the ethical hacker</title>
+  <meta name="description" content="Portfolio for Menhoudj — The Ethical Hacker. Wild 3D animations, projects, skills, and contact." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root{
+      --bg-1:#05060d; --bg-2:#0a0f26; --text:#eef2ff; --muted:#aab1d9;
+      --accent:#7c5cff; --accent-2:#00e5ff; --good:#00d879; --warn:#ffbd3c;
+      --border:#23284a; --card:#0b0f24cc; --glass:#0a0e22b3; --shadow:0 24px 60px rgba(0,0,0,.45);
+      --radius:20px; --radius-lg:28px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;scroll-behavior:smooth}
+    body{margin:0; font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Helvetica, Arial; color:var(--text); background: radial-gradient(1200px 800px at 10% 10%, #0b1031 0%, #070a1c 40%, #04060f 100%); overflow-x:hidden}
+
+    /* ===== fixed 3D background ===== */
+    #scene{position:fixed; inset:0; z-index:-3}
+    #fx-canvas, #star-canvas{position:fixed; inset:0; z-index:-2}
+    .grid-overlay{position:fixed; inset:-2px; z-index:-1; pointer-events:none; opacity:.22; background:
+      linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px) 0 0 / 44px 44px,
+      linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px) 0 0 / 44px 44px; mix-blend-mode:screen}
+
+    /* ===== NAVBAR ===== */
+    .nav{position:sticky; top:0; z-index:50; background:linear-gradient(180deg, rgba(5,8,20,.7), rgba(5,8,20,.35)); backdrop-filter: blur(10px) saturate(120%); border-bottom:1px solid var(--border)}
+    .nav-wrap{max-width:1200px; margin:auto; padding:12px 18px; display:flex; align-items:center; gap:16px}
+    .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text)}
+    .brand .logo{width:36px; height:36px; border-radius:10px; background:conic-gradient(from 180deg, #0ff, #8a2be2, #ff00f7, #0ff); box-shadow:0 8px 28px rgba(124,92,255,.45)}
+    .brand .name{font-weight:800; letter-spacing:.4px; text-transform:uppercase}
+    .sp{flex:1}
+    .nav a.menu{color:var(--muted); text-decoration:none; font-weight:800; padding:10px 14px; border-radius:12px; position:relative}
+    .nav a.menu::after{content:""; position:absolute; left:10px; right:10px; bottom:6px; height:2px; background:linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent); transform:scaleX(0); transform-origin:left; transition:transform .35s ease}
+    .nav a.menu.active{color:var(--text)}
+    .nav a.menu.active::after, .nav a.menu:hover::after{transform:scaleX(1)}
+
+    /* ===== SECTIONS ===== */
+    section{max-width:1200px; margin:auto; padding:110px 18px}
+    .hero{display:grid; grid-template-columns:1.1fr .9fr; gap:30px; align-items:center; min-height:82vh}
+    @media (max-width: 900px){ .hero{grid-template-columns:1fr} }
+
+    /* 3D Title */
+    .title{font-size:clamp(36px, 7vw, 78px); font-weight:800; line-height:1.05; letter-spacing:.6px; margin:0 0 12px; perspective:1000px}
+    .title span{display:inline-block; transform:rotateX(14deg) rotateY(-8deg) translateZ(8px); transform-style:preserve-3d; text-shadow: 0 10px 30px rgba(0,0,0,.6)}
+    .title .glow{position:relative; background: linear-gradient(90deg, #9c7cff, #00e5ff); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent}
+    .title .glow::after{content:""; position:absolute; inset:-6px -8px; z-index:-1; filter:blur(18px); background: linear-gradient(90deg, #9c7cff66, #00e5ff66); opacity:.7}
+
+    .lead{color:var(--muted); font-size:clamp(16px,2.2vw,20px)}
+
+    .cta-row{display:flex; gap:16px; flex-wrap:wrap; margin-top:22px}
+    .btn{--h:56px; height:var(--h); padding:0 22px; border-radius:calc(var(--h)/2); border:1px solid var(--border); background:linear-gradient(180deg,#121631,#0d122b); color:var(--text); font-weight:800; letter-spacing:.3px; text-decoration:none; display:inline-flex; align-items:center; gap:10px; position:relative; overflow:hidden; transition:transform .15s ease}
+    .btn .shine{position:absolute; inset:-2px; background:linear-gradient(110deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%); transform:translateX(-120%); transition:transform .8s ease}
+    .btn:hover .shine{transform:translateX(120%)}
+    .btn.primary{background:linear-gradient(180deg,#20124d,#161a49); border:1px solid #3a2a7d; box-shadow:0 12px 40px rgba(124,92,255,.28)}
+    .btn.magnetic:hover{transform:translateY(-2px)}
+    .btn:active::before{content:""; position:absolute; width:200px; height:200px; border-radius:50%; left:var(--x,50%); top:var(--y,50%); transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,255,255,.25), transparent 60%)}
+
+    /* Socials */
+    .socials{display:flex; gap:12px; margin-top:18px}
+    .icon-btn{width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(180deg,#0e122b,#0b0f24); border:1px solid var(--border); position:relative; overflow:hidden; transition:transform .18s ease}
+    .icon-btn i{font-size:20px}
+    .icon-btn::after{content:""; position:absolute; inset:0; background: radial-gradient(400px 80px at 50% 0%, rgba(124,92,255,.28), transparent 60%); opacity:0; transition:.4s}
+    .icon-btn:hover::after{opacity:1}
+
+    /* About */
+    .about{display:grid; grid-template-columns:1.1fr .9fr; gap:26px; align-items:center}
+    @media (max-width: 900px){ .about{grid-template-columns:1fr} }
+    .about .card{background:linear-gradient(180deg,#0b0f22cc,#090d1ecc); border:1px solid var(--border); border-radius:var(--radius-lg); padding:26px; box-shadow:var(--shadow)}
+    .mono{font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color:#d5d8f6}
+
+    /* Skills */
+    .section-title{font-size:34px; font-weight:800; margin:0 0 22px}
+    .skills-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:16px}
+    @media (max-width:1100px){.skills-grid{grid-template-columns:repeat(4,1fr)}}
+    @media (max-width:700px){.skills-grid{grid-template-columns:repeat(2,1fr)}}
+    .skill{position:relative; background:linear-gradient(180deg,#0b0f24,#0a0e21); border:1px solid var(--border); border-radius:18px; padding:18px; height:140px; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; transform-style:preserve-3d; will-change:transform; transition: transform .25s ease}
+    .skill:hover{transform: translateY(-6px) rotateX(6deg) rotateY(-6deg)}
+    .skill .k{font-weight:800}
+    .skill .bar{height:8px; border-radius:8px; background:#151a3a; border:1px solid #2a2f4a; overflow:hidden}
+    .skill .bar > i{display:block; height:100%; background:linear-gradient(90deg, #7c5cff, #00e5ff)}
+
+    /* Projects */
+    .projects{display:grid; grid-template-columns:repeat(3, 1fr); gap:18px}
+    @media (max-width:1100px){.projects{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:750px){.projects{grid-template-columns:1fr}}
+    .card3d{position:relative; background:linear-gradient(180deg,#0b0f24,#0b0f24); border:1px solid var(--border); border-radius:22px; padding:18px; overflow:hidden; transform-style:preserve-3d; transition: transform .15s ease; box-shadow: var(--shadow)}
+    .card3d:hover{transform: translateY(-8px) rotateX(8deg) rotateY(-8deg)}
+    .card3d .thumb{height:200px; border-radius:16px; background: radial-gradient(400px 160px at 50% 10%, #1a1f44, #0e1330); border:1px solid #1f2441; display:grid; place-items:center; position:relative; overflow:hidden}
+    .chip{position:absolute; top:12px; left:12px; padding:6px 10px; border-radius:999px; font-size:12px; background:#0f1433; border:1px solid #262b4b}
+    .card3d h4{margin:12px 6px 6px}
+    .card3d p{margin:0 6px 14px; color:var(--muted)}
+
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid #2a2f4a; border-radius:999px; text-decoration:none; color:var(--text); font-weight:800; background:linear-gradient(180deg,#121631,#0d122b)}
+
+    /* Contact */
+    .contact-grid{display:grid; grid-template-columns:1fr .9fr; gap:22px}
+    @media (max-width:950px){.contact-grid{grid-template-columns:1fr}}
+    .contact .panel{background:linear-gradient(180deg,#0b0f22cc,#090d1ecc); border:1px solid var(--border); border-radius:var(--radius-lg); padding:22px; box-shadow:var(--shadow)}
+    label{display:block; font-weight:800; margin:10px 0 6px}
+    input, textarea{width:100%; background:#0b0f24; border:1px solid #1f2441; border-radius:14px; padding:14px; color:var(--text); font-family:inherit}
+    textarea{min-height:140px; resize:vertical}
+
+    /* Reveal animation */
+    .reveal{opacity:0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease}
+    .reveal.show{opacity:1; transform:none}
+
+    footer{padding:60px 18px; text-align:center; color:#9aa0c9}
+    .sep{height:1px; background:linear-gradient(90deg, transparent, #252a44, transparent); margin:0}
+
+    /* FX toggle button */
+    .fx-toggle{position:fixed; right:16px; bottom:16px; z-index:60; display:flex; gap:10px}
+    .fx-toggle .chip{position:static; cursor:pointer}
+  </style>
+</head>
+<body>
+  <!-- three.js 3D background -->
+  <canvas id="scene"></canvas>
+  <canvas id="star-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <nav class="nav">
+    <div class="nav-wrap">
+      <a href="#home" class="brand" aria-label="Go to Home">
+        <span class="logo" aria-hidden="true"></span>
+        <span class="name">menhoudj — the ethical hacker</span>
+      </a>
+      <div class="sp"></div>
+      <a class="menu" href="#home">Home</a>
+      <a class="menu" href="#about">About</a>
+      <a class="menu" href="#skills">Skills</a>
+      <a class="menu" href="#projects">Projects</a>
+      <a class="menu" href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ===== HERO ===== -->
+    <section id="home" class="hero">
+      <div>
+        <h1 class="title reveal"><span class="glow">Menhoudj</span> <span>the Ethical Hacker</span></h1>
+        <p class="lead reveal" style="transition-delay:.08s">I break things to make them stronger. Offensive security, web exploitation, and malware analysis — responsibly conducted and cleanly documented.</p>
+        <div class="cta-row reveal" style="transition-delay:.16s">
+          <a class="btn primary magnetic" href="#projects"><span class="shine"></span><i class="fa-solid fa-bolt"></i> Explore Projects</a>
+          <a class="btn magnetic" href="#contact"><span class="shine"></span><i class="fa-solid fa-paper-plane"></i> Get in Touch</a>
+        </div>
+        <div class="socials reveal" style="transition-delay:.24s">
+          <a class="icon-btn" href="#" aria-label="Facebook" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a class="icon-btn" href="#" aria-label="Instagram" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a class="icon-btn" href="#" aria-label="YouTube" title="YouTube"><i class="fab fa-youtube"></i></a>
+          <a class="icon-btn" href="#" aria-label="GitHub" title="GitHub"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.28s">
+        <div class="card3d" style="padding:26px; min-height:460px">
+          <div class="thumb" style="height:320px">
+            <svg width="220" height="220" viewBox="0 0 200 200" aria-hidden="true">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#7c5cff"/>
+                  <stop offset="100%" stop-color="#00e5ff"/>
+                </linearGradient>
+              </defs>
+              <g fill="none" stroke="url(#g1)" stroke-width="4">
+                <path d="M20 160 L100 20 L180 160 Z"/>
+                <circle cx="100" cy="120" r="34"/>
+                <path d="M66 118 L100 86 L134 118"/>
+              </g>
+            </svg>
+            <span class="chip">Live 3D</span>
+          </div>
+          <h4>Interactive 3D vibes</h4>
+          <p>Hover & move your cursor — the card tilts in 3D. Everything is CSS transforms with a tiny bit of JavaScript.</p>
+          <a class="pill" href="#projects"><i class="fa-solid fa-arrow-right"></i> See more</a>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep"/>
+
+    <!-- ===== ABOUT ===== -->
+    <section id="about" class="about">
+      <div class="reveal">
+        <h2 class="section-title">About</h2>
+        <div class="card">
+          <p>Hey, I’m <strong>Menhoudj</strong>. I practice <em>ethical hacking</em> — red teaming, web exploitation and reverse engineering. My goal is to help teams understand real attack paths and fix them with clarity.</p>
+          <p class="mono">focus: web vulns (XSS, SSRF, IDOR), AD privesc, malware static/dynamic analysis, OPSEC.</p>
+          <p>When I’m not breaking sandboxes, I build tools and write docs so others can reproduce findings. Security is a team sport.</p>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.08s">
+        <div class="card">
+          <h3 style="margin-top:0">Highlights</h3>
+          <ul>
+            <li>Reported criticals to several private programs (RCE chain, auth bypass, supply chain risk).</li>
+            <li>Built custom payload generators and obfuscators for controlled lab tests.</li>
+            <li>Comfortable across Linux, Windows internals, and mobile testing rigs.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep"/>
+
+    <!-- ===== SKILLS ===== -->
+    <section id="skills">
+      <h2 class="section-title reveal">Skills</h2>
+      <div class="skills-grid">
+        <div class="skill reveal" style="transition-delay:.02s"><div class="k">Web Exploitation</div><div class="bar"><i style="width:92%"></i></div><span class="mono">XSS • SSRF • IDOR • SQLi</span></div>
+        <div class="skill reveal" style="transition-delay:.04s"><div class="k">Red Team</div><div class="bar"><i style="width:88%"></i></div><span class="mono">Initial access • C2 • OPSEC</span></div>
+        <div class="skill reveal" style="transition-delay:.06s"><div class="k">Reverse Engineering</div><div class="bar"><i style="width:82%"></i></div><span class="mono">Malware • Android • ELF</span></div>
+        <div class="skill reveal" style="transition-delay:.08s"><div class="k">Scripting</div><div class="bar"><i style="width:86%"></i></div><span class="mono">Python • Bash • JS</span></div>
+        <div class="skill reveal" style="transition-delay:.10s"><div class="k">Cloud & AD</div><div class="bar"><i style="width:74%"></i></div><span class="mono">Azure • IAM • PrivEsc</span></div>
+        <div class="skill reveal" style="transition-delay:.12s"><div class="k">Reporting</div><div class="bar"><i style="width:94%"></i></div><span class="mono">Docs • Demos • Fix plans</span></div>
+      </div>
+    </section>
+
+    <hr class="sep"/>
+
+    <!-- ===== PROJECTS ===== -->
+    <section id="projects">
+      <h2 class="section-title reveal">Projects</h2>
+      <div class="projects">
+        <article class="card3d reveal" style="transition-delay:.02s">
+          <div class="thumb">
+            <span class="chip">Tooling</span>
+            <div class="mono">Payload Lab</div>
+          </div>
+          <h4>Payload Lab</h4>
+          <p>Modular payload generator with encoders/decoders for lab-only testing. Ships with safe templates.</p>
+          <a class="pill" href="#"><i class="fa-brands fa-github"></i> View Repo</a>
+        </article>
+        <article class="card3d reveal" style="transition-delay:.04s">
+          <div class="thumb">
+            <span class="chip">Web</span>
+            <div class="mono">Bug Hunter</div>
+          </div>
+          <h4>Bug Hunter Dashboard</h4>
+          <p>Single-pane dashboard for recon, duplicates detection, and write‑up exports.</p>
+          <a class="pill" href="#"><i class="fa-brands fa-github"></i> View Repo</a>
+        </article>
+        <article class="card3d reveal" style="transition-delay:.06s">
+          <div class="thumb">
+            <span class="chip">Research</span>
+            <div class="mono">Malware Lab</div>
+          </div>
+          <h4>Malware Lab</h4>
+          <p>Isolated detonation environment with VM automation and report extractor.</p>
+          <a class="pill" href="#"><i class="fa-solid fa-book"></i> Read Docs</a>
+        </article>
+      </div>
+    </section>
+
+    <hr class="sep"/>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="contact">
+      <h2 class="section-title reveal">Contact</h2>
+      <div class="contact-grid">
+        <div class="panel reveal">
+          <h3 style="margin-top:0">Let’s build safer systems</h3>
+          <p>Send a message and I’ll respond with scope & next steps. For responsible disclosure, include minimal sensitive details and we’ll move to a secure channel.</p>
+          <div class="mono">email: <a href="mailto:hello@menhoudj.dev">hello@menhoudj.dev</a></div>
+        </div>
+        <form id="contactForm" class="panel reveal" style="transition-delay:.08s">
+          <label for="name">Your Name</label>
+          <input id="name" name="name" placeholder="John Doe" required>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="john@example.com" required>
+          <label for="subject">Subject</label>
+          <input id="subject" name="subject" placeholder="Project inquiry" required>
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Tell me about your goals…" required></textarea>
+          <div class="cta-row">
+            <button class="btn primary magnetic" type="submit"><span class="shine"></span><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+            <a class="btn magnetic" href="mailto:hello@menhoudj.dev?subject=Hello%20Menhoudj&body=Hi%2C%20let%E2%80%99s%20talk" aria-label="Fallback email"><span class="shine"></span> Or Email</a>
+          </div>
+          <p id="formStatus" class="mono" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> menhoudj — the ethical hacker • Built with HTML, CSS & JS</p>
+  </footer>
+
+  <div class="fx-toggle">
+    <span class="chip" id="toggleMatrix" title="Toggle Matrix Rain">🌧️ Matrix Rain</span>
+    <span class="chip" id="toggleStars" title="Toggle Starfield">✨ Starfield</span>
+  </div>
+
+  <!-- three.js for 3D background -->
+  <script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>
+  <script>
+    // ====== THREE.JS Neon Scene (multiple wireframes + color shift) ======
+    const canvas = document.getElementById('scene');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+    function size(){renderer.setSize(innerWidth, innerHeight); renderer.setPixelRatio(Math.min(2, devicePixelRatio));}
+    size(); addEventListener('resize', size);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 3.8);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // objects
+    const mat1 = new THREE.MeshBasicMaterial({color:0x7c5cff, wireframe:true});
+    const mat2 = new THREE.MeshBasicMaterial({color:0x00e5ff, wireframe:true});
+
+    const tetra = new THREE.Mesh(new THREE.TetrahedronGeometry(1.05, 1), mat1);
+    group.add(tetra);
+
+    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(0.68, 0.12, 180, 24), mat2);
+    knot.position.z = -0.2; knot.rotation.x = Math.PI/4;
+    group.add(knot);
+
+    // floating points sphere
+    const pts = []; for(let i=0;i<2200;i++){ pts.push((Math.random()-0.5)*4, (Math.random()-0.5)*4, (Math.random()-0.5)*4); }
+    const geoPts = new THREE.BufferGeometry(); geoPts.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+    const cloud = new THREE.Points(geoPts, new THREE.PointsMaterial({size:0.01, color:0x9c8cff}));
+    scene.add(cloud);
+
+    const clock = new THREE.Clock();
+    function animate(){
+      const t = clock.getElapsedTime();
+      group.rotation.x = t * 0.22;
+      group.rotation.y = t * 0.18;
+      knot.rotation.z = t * 0.6;
+      cloud.rotation.y = t * 0.03;
+      const hue = (Math.sin(t*0.2)+1)/2; // 0..1
+      mat1.color.setHSL(0.72 + 0.1*hue, 1, 0.6);
+      mat2.color.setHSL(0.52 + 0.1*hue, 1, 0.6);
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // parallax with mouse
+    const target = {x:0,y:0};
+    addEventListener('mousemove', e=>{
+      target.x = (e.clientX / innerWidth - .5) * 0.6;
+      target.y = (e.clientY / innerHeight - .5) * -0.6;
+    });
+    (function loop(){
+      camera.position.x += (target.x - camera.position.x) * 0.06;
+      camera.position.y += (target.y - camera.position.y) * 0.06;
+      camera.lookAt(0,0,0);
+      requestAnimationFrame(loop);
+    })();
+
+    // ====== Starfield (canvas) + Matrix Rain toggle ======
+    const starCanvas = document.getElementById('star-canvas');
+    const starCtx = starCanvas.getContext('2d');
+    const fxCanvas = document.getElementById('fx-canvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    let w, h, dpr; let showStars = true; let showMatrix = false;
+    function sResize(){ dpr = Math.max(1, Math.min(2, window.devicePixelRatio||1)); w = starCanvas.width = fxCanvas.width = innerWidth * dpr; h = starCanvas.height = fxCanvas.height = innerHeight * dpr; starCanvas.style.width=fxCanvas.style.width=innerWidth+'px'; starCanvas.style.height=fxCanvas.style.height=innerHeight+'px';}
+    sResize(); addEventListener('resize', sResize);
+
+    // stars
+    const stars = []; const STAR_COUNT = 180;
+    function rand(a,b){return Math.random()*(b-a)+a}
+    function sInit(){ stars.length=0; for(let i=0;i<STAR_COUNT;i++){ stars.push({x:rand(0,w), y:rand(0,h), z:rand(.2,1.2), r:rand(.6,2.2), vx:rand(-.2,.2), vy:rand(-.2,.2)});} }
+    sInit();
+
+    // matrix rain
+    const chars = '01𝟬𝟭⟂⊕⟷';
+    let cols, drops;
+    function mInit(){ cols = Math.floor(w / (14*dpr)); drops = new Array(cols).fill(0).map(()=> Math.random()*h); }
+    mInit();
+
+    function tick(){
+      // stars
+      if(showStars){
+        starCtx.clearRect(0,0,w,h);
+        for(const s of stars){ s.x+=s.vx; s.y+=s.vy; if(s.x<0||s.x>w) s.vx*=-1; if(s.y<0||s.y>h) s.vy*=-1; starCtx.beginPath(); starCtx.arc(s.x, s.y, s.r, 0, Math.PI*2); starCtx.fillStyle = `rgba(${180+50*s.z|0}, ${200+50*s.z|0}, 255, ${0.6*s.z})`; starCtx.fill(); }
+      } else { starCtx.clearRect(0,0,w,h); }
+
+      // matrix
+      if(showMatrix){
+        fxCtx.fillStyle = 'rgba(10, 14, 34, 0.2)';
+        fxCtx.fillRect(0,0,w,h);
+        fxCtx.fillStyle = '#00e5ff';
+        fxCtx.font = `${14*dpr}px monospace`;
+        for(let i=0;i<cols;i++){
+          const ch = chars[Math.floor(Math.random()*chars.length)];
+          fxCtx.fillText(ch, i*14*dpr, drops[i]);
+          if(drops[i] > h && Math.random() > 0.975){ drops[i] = 0; }
+          drops[i] += (10 + Math.random()*20) * dpr;
+        }
+      } else { fxCtx.clearRect(0,0,w,h); }
+
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    document.getElementById('toggleMatrix').addEventListener('click', ()=>{ showMatrix = !showMatrix; if(showMatrix){ mInit(); } });
+    document.getElementById('toggleStars').addEventListener('click', ()=>{ showStars = !showStars; });
+
+    // ====== 3D tilt for cards & skills ======
+    function attachTilt(el){
+      const rect = ()=> el.getBoundingClientRect();
+      el.addEventListener('mousemove', (e)=>{
+        const r = rect();
+        const px = (e.clientX - r.left)/r.width - 0.5;
+        const py = (e.clientY - r.top)/r.height - 0.5;
+        const rx = (+py*14).toFixed(2);
+        const ry = (-px*14).toFixed(2);
+        el.style.transform = `translateY(-8px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      });
+      el.addEventListener('mouseleave', ()=>{ el.style.transform=''; });
+    }
+    document.querySelectorAll('.card3d, .skill').forEach(attachTilt);
+
+    // ====== Intersection reveal ======
+    const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target); } }); }, {threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    // ====== Magnetic buttons + ripple ======
+    function magnet(el){
+      el.addEventListener('mousemove', (e)=>{
+        const r = el.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
+        const dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
+        el.style.transform = `translate(${dx*6}px, ${dy*6}px)`;
+        el.style.boxShadow = `0 10px 30px rgba(0, 229, 255, .15)`;
+        el.style.setProperty('--x', `${e.clientX - r.left}px`);
+        el.style.setProperty('--y', `${e.clientY - r.top}px`);
+      });
+      el.addEventListener('mouseleave', ()=>{ el.style.transform=''; el.style.boxShadow=''; });
+    }
+    document.querySelectorAll('.magnetic').forEach(magnet);
+
+    // ====== Contact form (demo) ======
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      status.textContent = 'Sending…';
+      try{ await new Promise(r=> setTimeout(r, 800)); status.textContent = 'Message queued locally (demo). Connect a real endpoint to send.'; }
+      catch(err){ status.textContent = 'Send failed. Please try email link.'; }
+    });
+
+    // ====== Footer year ======
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ====== Scrollspy for nav ======
+    const links = [...document.querySelectorAll('.nav a.menu')];
+    const ids = links.map(a=> a.getAttribute('href'));
+    const obs = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        const id = '#' + e.target.id;
+        const l = links.find(a=> a.getAttribute('href')===id);
+        if(l){ if(e.isIntersecting){ links.forEach(a=> a.classList.remove('active')); l.classList.add('active'); } }
+      });
+    }, {rootMargin:'-50% 0px -45% 0px', threshold:0});
+    ids.forEach(id=>{ const sec = document.querySelector(id); if(sec) obs.observe(sec); });
+  </script>
+</body>
+</html>
